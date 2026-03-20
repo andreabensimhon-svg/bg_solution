@@ -26,3 +26,9 @@ Petite entreprise spécialisée dans la vente de matériaux de pointe pour la ca
 
 ## Architecture Fabric
 Pipeline | Notebook | Eventstream | API | Dataflow Gen2 | Operational Agent | Power BI | Copy Job | CI/CD | Spark Job Definition | Cosmos DB | SQL DB | Warehouse | Lakehouse | ML Model | RT Dashboard | Function | Variable
+
+## Plan de projet
+
+📋 **[Voir le plan de projet complet →](PLAN.md)**
+
+**Prochaine étape : Phase 1.1 - Générer les données de démonstration**
