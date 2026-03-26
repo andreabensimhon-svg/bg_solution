@@ -1,0 +1,42 @@
+/// SALES - Semantic Model
+model SM_Sales
+    culture: fr-FR
+    discourageImplicitMeasures
+
+    table fact_ventes
+        partition 'fact_ventes' = entity    entityName: fact_ventes    schemaName: gold
+        column date_vente          dataType: dateTime    formatString: dd/MM/yyyy
+        column client_id           dataType: int64    isHidden
+        column produit_id          dataType: int64    isHidden
+        column canal_vente         dataType: string
+        column nb_commandes        dataType: int64
+        column ca_brut_ht          dataType: decimal    formatString: #,##0.00 €
+        column ca_net_ht           dataType: decimal    formatString: #,##0.00 €
+        column panier_moyen        dataType: decimal    formatString: #,##0.00 €
+
+    table dim_clients_grands_comptes
+        partition 'grands_comptes' = entity    entityName: dim_clients_grands_comptes    schemaName: gold
+        column client_id           dataType: int64
+        column raison_sociale      dataType: string
+        column ca_mensuel_ht       dataType: decimal    formatString: #,##0.00 €
+        column atteinte_objectif_pct dataType: decimal  formatString: 0.00%
+
+    table dim_clients
+        partition 'dim_clients' = entity    entityName: shared_dim_clients    schemaName: shortcuts
+        column client_id           dataType: int64    isKey
+        column raison_sociale      dataType: string
+        column type_client         dataType: string
+        column categorie_abc       dataType: string
+
+    table dim_products
+        partition 'dim_products' = entity    entityName: shared_dim_products    schemaName: shortcuts
+        column produit_id          dataType: int64    isKey
+        column nom_produit         dataType: string
+        column categorie           dataType: string
+
+    relationship rel_ventes_clients
+        fromColumn: fact_ventes.client_id
+        toColumn: dim_clients.client_id
+    relationship rel_ventes_produits
+        fromColumn: fact_ventes.produit_id
+        toColumn: dim_products.produit_id

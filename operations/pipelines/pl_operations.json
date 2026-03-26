@@ -1,0 +1,34 @@
+{
+    "name": "pl_operations",
+    "properties": {
+        "description": "Pipeline domaine Operations : ERP → lh_operations Bronze → Silver → Gold",
+        "activities": [
+            { "name": "Copy_Production", "type": "Copy", "dependsOn": [],
+              "typeProperties": { "source": { "type": "SqlServerSource", "sqlReaderQuery": "SELECT * FROM dbo.ordres_fabrication WHERE date_modification >= '@{pipeline().parameters.LastLoadDate}'" },
+                "sink": { "type": "LakehouseTableSink", "tableActionOption": "Append" },
+                "datasetSink": { "referenceName": "ds_lh_operations_bronze", "parameters": { "tableName": "raw_erp_operations" } } } },
+            { "name": "Copy_Supply", "type": "Copy", "dependsOn": [],
+              "typeProperties": { "source": { "type": "SqlServerSource", "sqlReaderQuery": "SELECT * FROM dbo.supply_chain WHERE date_modification >= '@{pipeline().parameters.LastLoadDate}'" },
+                "sink": { "type": "LakehouseTableSink", "tableActionOption": "Append" },
+                "datasetSink": { "referenceName": "ds_lh_operations_bronze", "parameters": { "tableName": "raw_supply_chain" } } } },
+            { "name": "Copy_Sanitaire", "type": "Copy", "dependsOn": [],
+              "typeProperties": { "source": { "type": "SqlServerSource", "sqlReaderQuery": "SELECT * FROM dbo.controles_sanitaires" },
+                "sink": { "type": "LakehouseTableSink", "tableActionOption": "Append" },
+                "datasetSink": { "referenceName": "ds_lh_operations_bronze", "parameters": { "tableName": "raw_process_sanitaire" } } } },
+            { "name": "NB_Bronze_To_Silver", "type": "SparkNotebook",
+              "dependsOn": [
+                  { "activity": "Copy_Production", "dependencyConditions": ["Succeeded"] },
+                  { "activity": "Copy_Supply", "dependencyConditions": ["Succeeded"] },
+                  { "activity": "Copy_Sanitaire", "dependencyConditions": ["Succeeded"] }
+              ],
+              "typeProperties": { "notebook": { "referenceName": "nb_bronze_to_silver_operations" } } },
+            { "name": "NB_Silver_To_Gold", "type": "SparkNotebook",
+              "dependsOn": [{ "activity": "NB_Bronze_To_Silver", "dependencyConditions": ["Succeeded"] }],
+              "typeProperties": { "notebook": { "referenceName": "nb_silver_to_gold_operations" } } },
+            { "name": "Refresh_SM_Operations", "type": "WebActivity",
+              "dependsOn": [{ "activity": "NB_Silver_To_Gold", "dependencyConditions": ["Succeeded"] }],
+              "typeProperties": { "url": "@{pipeline().parameters.SemanticModelRefreshUrl}", "method": "POST", "body": "{}" } }
+        ],
+        "parameters": { "LastLoadDate": { "type": "String", "defaultValue": "1900-01-01" }, "SemanticModelRefreshUrl": { "type": "String" } }
+    }
+}

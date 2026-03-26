@@ -1,0 +1,28 @@
+{
+    "reports": [
+        {
+            "name": "rpt_production_supply", "displayName": "Production & Supply Chain", "semanticModel": "SM_Operations",
+            "pages": [
+                { "name": "Production", "visuals": [
+                    { "type": "card", "measure": "Taux Rendement Moyen" }, { "type": "card", "measure": "Nb Incidents" },
+                    { "type": "lineChart", "axis": "date_production", "values": ["Taux Rendement Moyen"] },
+                    { "type": "barChart", "axis": "ligne_production", "values": ["Quantité Produite", "Nb Incidents"] }
+                ]},
+                { "name": "Supply Chain", "visuals": [
+                    { "type": "card", "measure": "Délai Moyen Livraison" }, { "type": "card", "measure": "Taux Retard Fournisseurs %" },
+                    { "type": "barChart", "axis": "fournisseur_id", "values": ["Taux Retard Fournisseurs %"] }
+                ]}
+            ], "filters": ["annee", "mois", "ligne_production"]
+        },
+        {
+            "name": "rpt_process_sanitaire", "displayName": "Process Sanitaire", "semanticModel": "SM_Operations",
+            "pages": [
+                { "name": "Conformité", "visuals": [
+                    { "type": "gauge", "measure": "Taux Conformité Sanitaire %", "target": 98 },
+                    { "type": "card", "measure": "Nb Non Conformités" }, { "type": "card", "measure": "Nb Alertes Sanitaires" },
+                    { "type": "matrix", "rows": ["ligne_production", "type_controle"], "values": ["taux_conformite_pct", "nb_controles"] }
+                ]}
+            ], "filters": ["annee", "ligne_production", "type_controle"]
+        }
+    ]
+}

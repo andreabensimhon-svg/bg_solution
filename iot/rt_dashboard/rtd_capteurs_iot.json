@@ -1,0 +1,24 @@
+{
+    "name": "rtd_capteurs_iot", "displayName": "RT Dashboard - Capteurs IoT",
+    "autoRefreshInterval": "30s",
+    "pages": [{
+        "name": "Vue Temps Réel",
+        "tiles": [
+            { "id": "gauge_temp", "type": "KQLVisual", "visualType": "gauge", "title": "Température (5 min)",
+              "query": "iot_events_raw | where type_mesure == 'temperature' | where timestamp_capteur > ago(5m) | summarize avg(valeur)",
+              "thresholds": [{ "value": 100, "color": "green" }, { "value": 150, "color": "orange" }, { "value": 200, "color": "red" }] },
+            { "id": "gauge_pression", "type": "KQLVisual", "visualType": "gauge", "title": "Pression (5 min)",
+              "query": "iot_events_raw | where type_mesure == 'pression' | where timestamp_capteur > ago(5m) | summarize avg(valeur)" },
+            { "id": "gauge_humidite", "type": "KQLVisual", "visualType": "gauge", "title": "Humidité (5 min)",
+              "query": "iot_events_raw | where type_mesure == 'humidite' | where timestamp_capteur > ago(5m) | summarize avg(valeur)" },
+            { "id": "timeline", "type": "KQLVisual", "visualType": "lineChart", "title": "Évolution 30 min",
+              "query": "iot_events_raw | where timestamp_capteur > ago(30m) | summarize avg(valeur) by type_mesure, bin(timestamp_capteur, 1m) | render timechart" },
+            { "id": "anomalies", "type": "KQLVisual", "visualType": "card", "title": "Anomalies (1h)",
+              "query": "iot_events_raw | where timestamp_capteur > ago(1h) | where valeur > percentile(valeur, 99) | count" },
+            { "id": "heatmap", "type": "KQLVisual", "visualType": "heatMap", "title": "Heatmap zones",
+              "query": "iot_events_raw | where timestamp_capteur > ago(15m) | where type_mesure == 'temperature' | summarize avg(valeur) by ligne_production, zone" },
+            { "id": "table_events", "type": "KQLVisual", "visualType": "table", "title": "Derniers événements",
+              "query": "iot_events_raw | top 50 by timestamp_capteur desc" }
+        ]
+    }]
+}

@@ -1,0 +1,43 @@
+{
+    "reports": [
+        {
+            "name": "rpt_marges_forecast",
+            "displayName": "Marges & Forecast",
+            "semanticModel": "SM_Finance",
+            "pages": [
+                {
+                    "name": "Vue d'ensemble",
+                    "visuals": [
+                        { "type": "card", "measure": "CA Total HT" },
+                        { "type": "card", "measure": "Marge Brute %" },
+                        { "type": "card", "measure": "Croissance CA %" },
+                        { "type": "lineChart", "axis": "date_calcul", "values": ["CA Total HT", "Forecast CA"] },
+                        { "type": "barChart", "axis": "categorie_produit", "values": ["Marge Brute Totale"] }
+                    ]
+                },
+                {
+                    "name": "Détail Marges",
+                    "visuals": [
+                        { "type": "matrix", "rows": ["type_client", "raison_sociale"], "values": ["CA Total HT", "Marge Brute %"] },
+                        { "type": "waterfallChart", "category": "mois", "values": ["Marge Brute Totale"] }
+                    ]
+                }
+            ],
+            "filters": ["annee", "trimestre", "categorie_abc"]
+        },
+        {
+            "name": "rpt_bilans",
+            "displayName": "Bilans Comptables",
+            "semanticModel": "SM_Finance",
+            "pages": [
+                {
+                    "name": "Bilan Actif/Passif",
+                    "visuals": [
+                        { "type": "matrix", "rows": ["type_bilan", "poste_comptable"], "columns": ["annee_fiscale"], "values": ["montant", "variation_pct"] }
+                    ]
+                }
+            ],
+            "filters": ["annee_fiscale", "type_bilan"]
+        }
+    ]
+}

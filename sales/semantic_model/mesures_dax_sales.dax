@@ -1,0 +1,10 @@
+// SALES - Mesures DAX
+
+CA Net HT = SUMX(fact_ventes, fact_ventes[ca_net_ht])
+Nb Commandes = SUMX(fact_ventes, fact_ventes[nb_commandes])
+Volume Total Vendu = SUMX(fact_ventes, fact_ventes[quantite_totale])
+Panier Moyen = DIVIDE([CA Net HT], [Nb Commandes], 0)
+Nb Clients Actifs = DISTINCTCOUNT(fact_ventes[client_id])
+CA par Client = DIVIDE([CA Net HT], [Nb Clients Actifs], 0)
+Part Grands Comptes % = DIVIDE(CALCULATE([CA Net HT], dim_clients[categorie_abc] = "A"), [CA Net HT], 0)
+Top 10 Clients CA = CALCULATE([CA Net HT], TOPN(10, ALL(dim_clients), [CA Net HT], DESC))

@@ -3,67 +3,91 @@
 ## Cas d'étude
 Petite entreprise spécialisée dans la vente de matériaux de pointe pour la carrosserie.
 
+## Architecture Domain-Driven
+
+```
+                     ┌──────────┐
+                     │ lh_shared│  Référentiel commun
+                     │ (clients,│  (exposé via Shortcuts)
+                     │ produits)│
+                     └────┬─────┘
+                          │ Shortcuts ↓
+       ┌──────────┬───────┼───────┬──────────┐
+       ▼          ▼       ▼       ▼          ▼
+  ┌─────────┐┌──────────┐┌────────┐┌─────────┐
+  │lh_finance││lh_operat.││lh_sales││  lh_iot │
+  │ B/S/G   ││  B/S/G   ││ B/S/G  ││  B/S/G  │
+  └─────────┘└──────────┘└────────┘└─────────┘
+       │          │          │          │
+       ▼          ▼          ▼          ▼
+  Pipeline    Pipeline   Pipeline   Eventstream
+  Sem.Model   Sem.Model  Sem.Model  RT Dashboard
+  2 Reports   2 Reports  2 Reports  ML Model
+```
+
 ## Entités métier
-| Entité | Périmètre |
-|--------|-----------|
-| **Finance** | Forecasts, calculs de marges, 3 bilans comptables |
-| **Opérations** | Usine, supply chain, process sanitaire, production |
-| **Sales (B2B)** | Vente & distribution, client & merch, grands comptes |
-| **IT** | Admin, intégration BDD outils tiers vers ERP, connecteurs |
+| Entité | Périmètre | Lakehouse |
+|--------|-----------|-----------|
+| **Shared** | Clients, produits (référentiel) | `lh_shared` |
+| **Finance** | Transactions, bilans, marges, forecast | `lh_finance` |
+| **Opérations** | Production, supply chain, process sanitaire | `lh_operations` |
+| **Sales (B2B)** | Commandes, distributions, grands comptes | `lh_sales` |
+| **IoT** | Capteurs temps réel, anomalies | `lh_iot` |
 
 ## Sources de données
-- **1 BDD clients partagée**
-- **Structurées** : Tables relationnelles (ERP, CRM)
-- **Semi-structurées** : JSON
-- **Non-structurées** : Corps de mails, plans de supply, images capteurs IoT
-- **Temps réel** : Capteurs IoT via Eventstream
+- **1 BDD clients partagée** → `lh_shared`
+- **Structurées** : Tables ERP → domaines Finance/Operations/Sales
+- **Semi-structurées** : JSON → `lh_sales`
+- **Non-structurées** : Mails, images capteurs → `lh_sales`, `lh_iot`
+- **Temps réel** : Capteurs IoT via Eventstream → `lh_iot`
 
-## Usages
-- Streaming (temps réel capteurs)
-- Batch (systèmes legacy)
-- API
-- OLTP / OLAP
-
-## Architecture Fabric
-Pipeline | Notebook | Eventstream | API | Dataflow Gen2 | Operational Agent | Power BI | Copy Job | CI/CD | Spark Job Definition | Cosmos DB | SQL DB | Warehouse | Lakehouse | ML Model | RT Dashboard | Function | Variable
-
-## Arborescence des fichiers
+## Arborescence
 
 ```
 BGSolutions/
-├── lakehouse/
-│   ├── bronze/schema_bronze.sql          # 14 tables brutes
-│   ├── silver/schema_silver.sql          # 11 tables nettoyées
-│   └── gold/schema_gold.sql             # 13 tables métier
-├── notebooks/
-│   ├── bronze_to_silver/                 # 5 notebooks nettoyage
-│   ├── silver_to_gold/                   # 4 notebooks agrégation
-│   └── utils/                            # helpers + générateur démo
-├── ingestion/
-│   ├── pipelines/                        # 5 pipelines JSON (orchestrateur + 4)
-│   ├── connectors/connectors_config.json # 6 connecteurs
-│   ├── copy_jobs/                        # Copy job clients
-│   └── dataflow_gen2/                    # 2 Power Query M (mails, JSON)
-├── power_bi/
-│   ├── semantic_models/                  # TMDL + 25 mesures DAX
-│   └── reports/                          # 6 rapports définitions
-├── eventstream/es_iot_capteurs.json      # Eventstream IoT complet
-├── rt_dashboard/rtd_capteurs_iot.json    # Dashboard temps réel KQL
-├── api/openapi_spec.json                 # Spec OpenAPI 3.0 (6 endpoints)
-├── functions/fabric_functions.py         # 4 fonctions event-driven
-├── ml_models/                            # Anomalie IoT + Forecast ventes
-├── spark_jobs/sj_delta_maintenance.py    # Maintenance Delta Tables
-├── warehouse/warehouse_views.sql         # 11 vues OLAP (4 schémas)
-├── cosmos_db/cosmos_collections.json     # 3 containers NoSQL
-├── sql_db/schema_sqldb.sql              # 6 tables OLTP
-├── config/                               # settings.json + .env.template
-├── cicd/deployment_config.json           # Dev → Test → Prod
-├── operational_agent/agent_config.json   # Agent monitoring
-└── PLAN.md                               # Plan de projet 4 phases
+├── shared/            # Référentiel commun (lh_shared)
+│   ├── lakehouse/     # Bronze/Silver/Gold schemas
+│   ├── notebooks/     # 2 NB + utils (helpers, demo data)
+│   ├── copy_jobs/     # cj_clients_full
+│   └── connectors/    # 6 connecteurs + shortcuts config
+├── finance/           # Domaine Finance (lh_finance)
+│   ├── lakehouse/     # Bronze/Silver/Gold schemas
+│   ├── notebooks/     # 2 NB (B→S, S→G)
+│   ├── pipelines/     # pl_finance
+│   ├── semantic_model/# SM_Finance + DAX
+│   └── reports/       # 2 rapports (Marges, Bilans)
+├── operations/        # Domaine Opérations (lh_operations)
+│   ├── lakehouse/     # Bronze/Silver/Gold schemas
+│   ├── notebooks/     # 2 NB
+│   ├── pipelines/     # pl_operations
+│   ├── semantic_model/# SM_Operations + DAX
+│   └── reports/       # 2 rapports (Production, Sanitaire)
+├── sales/             # Domaine Sales (lh_sales)
+│   ├── lakehouse/     # Bronze/Silver/Gold schemas
+│   ├── notebooks/     # 2 NB
+│   ├── pipelines/     # pl_sales
+│   ├── semantic_model/# SM_Sales + DAX
+│   ├── reports/       # 2 rapports (Ventes, Grands comptes)
+│   └── dataflow_gen2/ # 2 Dataflows (JSON, Mails)
+├── iot/               # Domaine IoT (lh_iot)
+│   ├── lakehouse/     # Bronze/Silver/Gold schemas
+│   ├── notebooks/     # 2 NB
+│   ├── eventstream/   # es_iot_capteurs
+│   ├── rt_dashboard/  # rtd_capteurs_iot
+│   └── ml_models/     # ml_iot_anomaly_detection
+└── platform/          # Infrastructure cross-domaine
+    ├── warehouse/     # Vues OLAP cross-Lakehouse
+    ├── api/           # OpenAPI 3.0 spec
+    ├── functions/     # Fabric Functions
+    ├── cosmos_db/     # Collections NoSQL
+    ├── sql_db/        # Tables OLTP
+    ├── cicd/          # Dev→Test→Prod
+    ├── operational_agent/ # Agent monitoring
+    ├── spark_jobs/    # Delta maintenance
+    ├── ml_models/     # Forecast ventes (cross-domaine)
+    └── config/        # Settings + env template
 ```
 
 ## Plan de projet
 
 📋 **[Voir le plan de projet complet →](PLAN.md)**
-
-**Prochaine étape : Phase 1.1 - Générer les données de démonstration**

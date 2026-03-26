@@ -1,0 +1,19 @@
+// FINANCE - Mesures DAX
+
+CA Total HT = SUMX(fact_marges, fact_marges[chiffre_affaires_ht])
+
+Marge Brute Totale = [CA Total HT] - SUMX(fact_marges, fact_marges[cout_revient])
+
+Marge Brute % = DIVIDE([Marge Brute Totale], [CA Total HT], 0)
+
+Marge Nette Totale = [Marge Brute Totale] * 0.85
+
+Marge Nette % = DIVIDE([Marge Nette Totale], [CA Total HT], 0)
+
+CA Année Précédente = CALCULATE([CA Total HT], SAMEPERIODLASTYEAR('Calendrier'[Date]))
+
+Croissance CA % = DIVIDE([CA Total HT] - [CA Année Précédente], [CA Année Précédente], 0)
+
+Forecast CA = SUMX(fact_forecast, fact_forecast[ca_prevu])
+
+Écart Forecast % = DIVIDE([CA Total HT] - [Forecast CA], [Forecast CA], 0)

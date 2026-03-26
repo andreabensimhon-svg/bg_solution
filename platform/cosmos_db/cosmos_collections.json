@@ -1,0 +1,18 @@
+{
+    "database": "bgsolutions",
+    "throughput": { "type": "autoscale", "maxThroughput": 4000 },
+    "containers": [
+        {
+            "name": "clients", "partitionKey": "/type_client", "defaultTtl": -1,
+            "description": "Profils clients enrichis (source : lh_shared.gold.dim_clients)",
+            "sampleDocument": { "id": "client-001", "client_id": 1, "raison_sociale": "Client_0001",
+                "type_client": "grand_compte", "categorie_abc": "A", "ca_cumule_ht": 250000.00 }
+        },
+        {
+            "name": "iot_events", "partitionKey": "/capteur_id", "defaultTtl": 86400,
+            "description": "Événements IoT récents (source : lh_iot via Eventstream)",
+            "sampleDocument": { "id": "evt-001", "capteur_id": "CAPT-PROD-001", "type_mesure": "temperature",
+                "valeur": 82.5, "timestamp_capteur": "2025-12-01T10:30:00Z" }
+        }
+    ]
+}

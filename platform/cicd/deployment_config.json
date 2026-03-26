@@ -1,0 +1,26 @@
+{
+    "deployment_pipelines": {
+        "name": "dp_bgsolutions",
+        "stages": [
+            { "name": "Development", "order": 0, "workspaceName": "BGSolutions_Dev" },
+            { "name": "Test", "order": 1, "workspaceName": "BGSolutions_Test" },
+            { "name": "Production", "order": 2, "workspaceName": "BGSolutions_Prod" }
+        ],
+        "rules": [
+            { "type": "ParameterRule", "sourceItemType": "Notebook", "parameter": "environment",
+              "values": { "Development": "dev", "Test": "test", "Production": "prod" } }
+        ]
+    },
+    "git_integration": {
+        "provider": "GitHub", "repository": "bg_solution", "owner": "andreabensimhon-svg",
+        "branch": "main", "connectedWorkspace": "BGSolutions_Dev"
+    },
+    "artifacts_per_domain": {
+        "shared": ["lh_shared", "cj_clients_full", "nb_*_shared"],
+        "finance": ["lh_finance", "pl_finance", "nb_*_finance", "SM_Finance", "rpt_marges_*", "rpt_bilans"],
+        "operations": ["lh_operations", "pl_operations", "nb_*_operations", "SM_Operations", "rpt_production_*", "rpt_sanitaire"],
+        "sales": ["lh_sales", "pl_sales", "nb_*_sales", "SM_Sales", "rpt_ventes_*", "rpt_grands_comptes", "df_*"],
+        "iot": ["lh_iot", "es_iot_capteurs", "db_iot_realtime", "rtd_capteurs_iot", "nb_*_iot", "ml_*"],
+        "platform": ["wh_bgsolutions", "sqldb_app", "cosmos_bgsolutions", "fn_*", "api_*", "sj_*", "oa_*"]
+    }
+}

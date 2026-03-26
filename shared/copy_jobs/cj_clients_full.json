@@ -1,0 +1,13 @@
+{
+    "name": "cj_clients_full",
+    "description": "Copy Job - Chargement complet de la BDD clients partagée vers lh_shared Bronze",
+    "sourceConnection": "conn_bdd_clients",
+    "destinationConnection": "conn_lh_shared",
+    "copyBehavior": "Overwrite",
+    "schedule": { "frequency": "Daily", "time": "02:00", "timeZone": "Europe/Paris" },
+    "mappings": [
+        { "source": { "table": "dbo.clients" }, "destination": { "table": "raw_clients" } },
+        { "source": { "table": "dbo.produits" }, "destination": { "table": "raw_produits" } }
+    ],
+    "settings": { "parallelCopies": 4, "enableLogging": true, "logStoragePath": "Files/logs/copy_jobs/" }
+}

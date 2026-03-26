@@ -1,0 +1,36 @@
+/// OPERATIONS - Semantic Model
+model SM_Operations
+    culture: fr-FR
+    discourageImplicitMeasures
+
+    table fact_production
+        partition 'fact_production' = entity    entityName: fact_production    schemaName: gold
+        column date_production     dataType: dateTime
+        column ligne_production    dataType: string
+        column nb_ordres           dataType: int64
+        column quantite_produite_total dataType: int64
+        column taux_rendement_moyen dataType: decimal    formatString: 0.00%
+        column nb_incidents        dataType: int64
+
+    table fact_supply_chain
+        partition 'fact_supply_chain' = entity    entityName: fact_supply_chain    schemaName: gold
+        column date_periode        dataType: dateTime
+        column fournisseur_id      dataType: int64
+        column delai_moyen_jours   dataType: decimal
+        column taux_retard_pct     dataType: decimal    formatString: 0.00%
+        column taux_conformite_pct dataType: decimal    formatString: 0.00%
+
+    table fact_process_sanitaire
+        partition 'fact_sanitaire' = entity    entityName: fact_process_sanitaire    schemaName: gold
+        column date_periode        dataType: dateTime
+        column ligne_production    dataType: string
+        column type_controle       dataType: string
+        column taux_conformite_pct dataType: decimal    formatString: 0.00%
+        column nb_non_conformes    dataType: int64
+        column nb_alertes          dataType: int64
+
+    table dim_products
+        partition 'dim_products' = entity    entityName: shared_dim_products    schemaName: shortcuts
+        column produit_id          dataType: int64    isKey
+        column nom_produit         dataType: string
+        column categorie           dataType: string

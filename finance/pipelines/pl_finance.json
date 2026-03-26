@@ -1,0 +1,57 @@
+{
+    "name": "pl_finance",
+    "properties": {
+        "description": "Pipeline domaine Finance : ingestion ERP → Bronze → Silver → Gold (lh_finance)",
+        "activities": [
+            {
+                "name": "Copy_ERP_Finance_Transactions",
+                "type": "Copy",
+                "dependsOn": [],
+                "typeProperties": {
+                    "source": { "type": "SqlServerSource", "sqlReaderQuery": "SELECT * FROM dbo.finance_transactions WHERE date_modification >= '@{pipeline().parameters.LastLoadDate}'" },
+                    "sink": { "type": "LakehouseTableSink", "tableActionOption": "Append" },
+                    "datasetSink": { "referenceName": "ds_lh_finance_bronze", "parameters": { "tableName": "raw_erp_finance" } }
+                }
+            },
+            {
+                "name": "Copy_ERP_Bilans",
+                "type": "Copy",
+                "dependsOn": [],
+                "typeProperties": {
+                    "source": { "type": "SqlServerSource", "sqlReaderQuery": "SELECT * FROM dbo.bilans_comptables" },
+                    "sink": { "type": "LakehouseTableSink", "tableActionOption": "Overwrite" },
+                    "datasetSink": { "referenceName": "ds_lh_finance_bronze", "parameters": { "tableName": "raw_erp_bilans" } }
+                }
+            },
+            {
+                "name": "NB_Bronze_To_Silver_Finance",
+                "type": "SparkNotebook",
+                "dependsOn": [
+                    { "activity": "Copy_ERP_Finance_Transactions", "dependencyConditions": ["Succeeded"] },
+                    { "activity": "Copy_ERP_Bilans", "dependencyConditions": ["Succeeded"] }
+                ],
+                "typeProperties": { "notebook": { "referenceName": "nb_bronze_to_silver_finance" } }
+            },
+            {
+                "name": "NB_Silver_To_Gold_Finance",
+                "type": "SparkNotebook",
+                "dependsOn": [
+                    { "activity": "NB_Bronze_To_Silver_Finance", "dependencyConditions": ["Succeeded"] }
+                ],
+                "typeProperties": { "notebook": { "referenceName": "nb_silver_to_gold_finance" } }
+            },
+            {
+                "name": "Refresh_SM_Finance",
+                "type": "WebActivity",
+                "dependsOn": [
+                    { "activity": "NB_Silver_To_Gold_Finance", "dependencyConditions": ["Succeeded"] }
+                ],
+                "typeProperties": { "url": "@{pipeline().parameters.SemanticModelRefreshUrl}", "method": "POST", "body": "{}" }
+            }
+        ],
+        "parameters": {
+            "LastLoadDate": { "type": "String", "defaultValue": "1900-01-01" },
+            "SemanticModelRefreshUrl": { "type": "String", "defaultValue": "" }
+        }
+    }
+}

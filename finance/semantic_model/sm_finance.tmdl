@@ -1,0 +1,45 @@
+/// FINANCE - Semantic Model
+/// Sources : lh_finance.gold + Shortcuts lh_shared.gold
+
+model SM_Finance
+    culture: fr-FR
+    discourageImplicitMeasures
+
+    table fact_marges
+        partition 'fact_marges' = entity    entityName: fact_marges    schemaName: gold
+        column date_calcul         dataType: dateTime    formatString: dd/MM/yyyy
+        column annee               dataType: int64
+        column mois                dataType: int64
+        column trimestre           dataType: int64
+        column client_id           dataType: int64    isHidden
+        column categorie_produit   dataType: string
+        column chiffre_affaires_ht dataType: decimal    formatString: #,##0.00 €
+        column marge_brute         dataType: decimal    formatString: #,##0.00 €
+        column marge_brute_pct     dataType: decimal    formatString: 0.00%
+
+    table fact_forecast
+        partition 'fact_forecast' = entity    entityName: fact_forecast    schemaName: gold
+        column date_forecast       dataType: dateTime
+        column ca_prevu            dataType: decimal    formatString: #,##0.00 €
+        column ca_reel             dataType: decimal    formatString: #,##0.00 €
+        column ecart_pct           dataType: decimal    formatString: 0.00%
+
+    table dim_bilans_comptables
+        partition 'dim_bilans' = entity    entityName: dim_bilans_comptables    schemaName: gold
+        column annee_fiscale       dataType: int64
+        column type_bilan          dataType: string
+        column poste_comptable     dataType: string
+        column montant             dataType: decimal    formatString: #,##0.00 €
+        column variation_pct       dataType: decimal    formatString: 0.00%
+
+    /// Shortcut depuis lh_shared
+    table dim_clients
+        partition 'dim_clients' = entity    entityName: shared_dim_clients    schemaName: shortcuts
+        column client_id           dataType: int64    isKey
+        column raison_sociale      dataType: string
+        column type_client         dataType: string
+        column categorie_abc       dataType: string
+
+    relationship rel_marges_clients
+        fromColumn: fact_marges.client_id
+        toColumn: dim_clients.client_id

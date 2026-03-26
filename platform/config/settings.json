@@ -1,0 +1,26 @@
+{
+    "project": { "name": "BGSolutions", "version": "2.0.0", "description": "Plateforme Data Fabric - Architecture domain-driven" },
+    "domains": ["shared", "finance", "operations", "sales", "iot"],
+    "fabric": {
+        "lakehouses": {
+            "lh_shared": { "domain": "shared", "description": "Référentiel clients/produits partagé via Shortcuts" },
+            "lh_finance": { "domain": "finance", "description": "Données financières (transactions, bilans, marges)" },
+            "lh_operations": { "domain": "operations", "description": "Données opérations (production, supply, sanitaire)" },
+            "lh_sales": { "domain": "sales", "description": "Données ventes (commandes, distributions, mails)" },
+            "lh_iot": { "domain": "iot", "description": "Données capteurs IoT temps réel" }
+        },
+        "warehouse": "wh_bgsolutions",
+        "sql_db": "sqldb_app",
+        "cosmos_db": "cosmos_bgsolutions"
+    },
+    "schedules": {
+        "pl_shared": { "cron": "0 2 * * *", "timezone": "Europe/Paris" },
+        "pl_finance": { "cron": "0 3 * * *", "timezone": "Europe/Paris" },
+        "pl_operations": { "cron": "0 3 * * *", "timezone": "Europe/Paris" },
+        "pl_sales": { "cron": "0 3 * * *", "timezone": "Europe/Paris" },
+        "sj_delta_maintenance": { "cron": "0 1 * * 0", "timezone": "Europe/Paris" },
+        "ml_anomaly": { "cron": "0 6 * * *", "timezone": "Europe/Paris" },
+        "ml_forecast": { "cron": "0 5 1 * *", "timezone": "Europe/Paris" }
+    },
+    "key_vault": { "name": "${KEY_VAULT_NAME}", "secrets": ["erp-sql-sp-secret", "clients-sql-sp-secret", "cosmos-db-key", "json-api-client-secret"] }
+}

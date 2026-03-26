@@ -1,0 +1,21 @@
+{
+    "name": "oa_bgsolutions",
+    "displayName": "BGSolutions Operational Agent",
+    "instructions": "Tu supervises la plateforme data BGSolutions organisée par domaine (shared, finance, operations, sales, iot). Tu peux interroger chaque Lakehouse et le Warehouse cross-domaine.",
+    "capabilities": {
+        "data_query": { "enabled": true, "schemas": ["lh_shared.gold", "lh_finance.gold", "lh_operations.gold", "lh_sales.gold", "lh_iot.gold"] },
+        "pipeline_monitoring": { "enabled": true, "pipelines": ["pl_finance", "pl_operations", "pl_sales"] },
+        "alerting": { "enabled": true, "types": ["iot_anomalie", "seuil_finance", "retard_supply", "non_conformite", "systeme"] }
+    },
+    "scheduled_tasks": [
+        { "name": "health_check", "schedule": "0 8 * * *", "action": "Vérifier les dernières exécutions de tous les pipelines domaine" },
+        { "name": "iot_anomalies", "schedule": "0 7 * * *", "action": "Résumé anomalies IoT 24h" },
+        { "name": "daily_kpis", "schedule": "0 9 * * 1-5", "action": "KPIs cross-domaine : CA, commandes, rendement, anomalies" }
+    ],
+    "sample_prompts": [
+        "Quel est le CA total du mois dernier ?",
+        "Y a-t-il des anomalies IoT critiques ?",
+        "Quel est le statut du pipeline Finance ?",
+        "Montre les 10 meilleurs clients"
+    ]
+}

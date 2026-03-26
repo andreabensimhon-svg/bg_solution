@@ -1,0 +1,12 @@
+// OPERATIONS - Mesures DAX
+
+Taux Rendement Moyen = AVERAGEX(fact_production, fact_production[taux_rendement_moyen])
+Nb Incidents = SUMX(fact_production, fact_production[nb_incidents])
+Nb Ordres Fabrication = SUMX(fact_production, fact_production[nb_ordres])
+Quantité Produite = SUMX(fact_production, fact_production[quantite_produite_total])
+Taux Incidents % = DIVIDE([Nb Incidents], [Nb Ordres Fabrication], 0)
+Délai Moyen Livraison = AVERAGEX(fact_supply_chain, fact_supply_chain[delai_moyen_jours])
+Taux Retard Fournisseurs % = AVERAGEX(fact_supply_chain, fact_supply_chain[taux_retard_pct])
+Taux Conformité Sanitaire % = AVERAGEX(fact_process_sanitaire, fact_process_sanitaire[taux_conformite_pct])
+Nb Non Conformités = SUMX(fact_process_sanitaire, fact_process_sanitaire[nb_non_conformes])
+Nb Alertes Sanitaires = SUMX(fact_process_sanitaire, fact_process_sanitaire[nb_alertes])

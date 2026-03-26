@@ -1,0 +1,29 @@
+{
+    "reports": [
+        {
+            "name": "rpt_ventes_b2b", "displayName": "Ventes B2B", "semanticModel": "SM_Sales",
+            "pages": [
+                { "name": "Vue d'ensemble", "visuals": [
+                    { "type": "card", "measure": "CA Net HT" }, { "type": "card", "measure": "Nb Commandes" },
+                    { "type": "card", "measure": "Panier Moyen" }, { "type": "card", "measure": "Nb Clients Actifs" },
+                    { "type": "lineChart", "axis": "date_vente", "values": ["CA Net HT"] },
+                    { "type": "donutChart", "legend": "canal_vente", "values": ["CA Net HT"] }
+                ]},
+                { "name": "Analyse Clients", "visuals": [
+                    { "type": "barChart", "axis": "raison_sociale", "values": ["CA Net HT"], "topN": 20 },
+                    { "type": "pieChart", "legend": "categorie_abc", "values": ["Nb Clients Actifs"] }
+                ]}
+            ], "filters": ["annee", "trimestre", "type_client", "canal_vente"]
+        },
+        {
+            "name": "rpt_grands_comptes", "displayName": "Grands Comptes", "semanticModel": "SM_Sales",
+            "pages": [
+                { "name": "Suivi", "visuals": [
+                    { "type": "card", "measure": "Part Grands Comptes %" },
+                    { "type": "lineChart", "axis": "date_periode", "values": ["ca_mensuel_ht", "objectif_mensuel"] },
+                    { "type": "table", "columns": ["raison_sociale", "ca_mensuel_ht", "ca_cumul_annee", "atteinte_objectif_pct"] }
+                ]}
+            ], "filters": ["annee", "raison_sociale"]
+        }
+    ]
+}

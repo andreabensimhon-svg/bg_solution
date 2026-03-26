@@ -1,0 +1,26 @@
+{
+    "openapi": "3.0.3",
+    "info": { "title": "BGSolutions Data API", "version": "1.0.0", "description": "API cross-domaine pour exposer les données aux systèmes tiers" },
+    "security": [{ "bearerAuth": [] }],
+    "paths": {
+        "/clients": { "get": { "summary": "Liste clients (shared)", "tags": ["Shared"],
+            "parameters": [{ "name": "type_client", "in": "query", "schema": { "type": "string" } }, { "name": "categorie_abc", "in": "query", "schema": { "type": "string" } }],
+            "responses": { "200": { "description": "OK" } } } },
+        "/clients/{id}": { "get": { "summary": "Détail client", "tags": ["Shared"],
+            "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+            "responses": { "200": { "description": "OK" }, "404": { "description": "Not found" } } } },
+        "/finance/kpis": { "get": { "summary": "KPIs Finance", "tags": ["Finance"],
+            "parameters": [{ "name": "annee", "in": "query", "schema": { "type": "integer" } }],
+            "responses": { "200": { "description": "OK" } } } },
+        "/sales/orders": { "get": { "summary": "Commandes Sales", "tags": ["Sales"],
+            "parameters": [{ "name": "client_id", "in": "query", "schema": { "type": "integer" } }, { "name": "statut", "in": "query", "schema": { "type": "string" } }],
+            "responses": { "200": { "description": "OK" } } } },
+        "/iot/realtime": { "get": { "summary": "Mesures IoT", "tags": ["IoT"],
+            "parameters": [{ "name": "capteur_id", "in": "query", "schema": { "type": "string" } }, { "name": "minutes", "in": "query", "schema": { "type": "integer", "default": 30 } }],
+            "responses": { "200": { "description": "OK" } } } },
+        "/iot/anomalies": { "get": { "summary": "Anomalies IoT", "tags": ["IoT"],
+            "parameters": [{ "name": "severite", "in": "query", "schema": { "type": "string", "enum": ["info", "warning", "critical"] } }],
+            "responses": { "200": { "description": "OK" } } } }
+    },
+    "components": { "securitySchemes": { "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" } } }
+}

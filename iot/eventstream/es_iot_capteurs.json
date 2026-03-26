@@ -1,0 +1,31 @@
+{
+    "name": "es_iot_capteurs",
+    "description": "Eventstream IoT : capteurs → lh_iot Bronze + KQL Database + RT Dashboard",
+    "source": {
+        "name": "src_iot_capteurs", "type": "CustomEndpoint",
+        "properties": { "dataFormat": "JSON", "partitionCount": 4, "retentionPeriodInDays": 1 },
+        "schema": { "fields": [
+            { "name": "event_id", "type": "string" }, { "name": "capteur_id", "type": "string" },
+            { "name": "type_mesure", "type": "string" }, { "name": "valeur", "type": "double" },
+            { "name": "unite", "type": "string" }, { "name": "timestamp_capteur", "type": "string" },
+            { "name": "ligne_production", "type": "string" }, { "name": "zone", "type": "string" },
+            { "name": "qualite_signal", "type": "double" }
+        ]}
+    },
+    "transformations": [
+        { "name": "trx_filter", "type": "Filter", "expression": "valeur IS NOT NULL AND capteur_id IS NOT NULL AND qualite_signal > 50" },
+        { "name": "trx_agg_5min", "type": "GroupBy", "windowType": "Tumbling", "windowSize": "5 minutes",
+          "groupByFields": ["capteur_id", "type_mesure", "ligne_production", "zone"],
+          "aggregations": [
+              { "function": "AVG", "field": "valeur", "alias": "valeur_moyenne" },
+              { "function": "MIN", "field": "valeur", "alias": "valeur_min" },
+              { "function": "MAX", "field": "valeur", "alias": "valeur_max" },
+              { "function": "COUNT", "field": "*", "alias": "nb_mesures" }
+          ]}
+    ],
+    "destinations": [
+        { "name": "dest_lakehouse", "type": "Lakehouse", "properties": { "lakehouse": "lh_iot", "tableName": "raw_iot_stream" }, "sourceTransformation": "trx_filter" },
+        { "name": "dest_kql", "type": "KQLDatabase", "properties": { "databaseName": "db_iot_realtime", "tableName": "iot_events_raw" }, "sourceTransformation": "trx_filter" },
+        { "name": "dest_rt_dashboard", "type": "CustomEndpoint", "sourceTransformation": "trx_agg_5min" }
+    ]
+}

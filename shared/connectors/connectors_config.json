@@ -1,0 +1,80 @@
+{
+    "connectors": [
+        {
+            "name": "conn_bdd_clients",
+            "type": "SqlServer",
+            "description": "BDD clients partagée → lh_shared",
+            "connectionProperties": {
+                "server": "${CLIENTS_SQL_SERVER}",
+                "database": "${CLIENTS_SQL_DATABASE}",
+                "authenticationType": "ServicePrincipal",
+                "keyVaultSecretName": "clients-sql-sp-secret"
+            }
+        },
+        {
+            "name": "conn_erp_sql",
+            "type": "SqlServer",
+            "description": "ERP SQL Server → lh_finance, lh_operations, lh_sales",
+            "connectionProperties": {
+                "server": "${ERP_SQL_SERVER}",
+                "database": "${ERP_SQL_DATABASE}",
+                "authenticationType": "ServicePrincipal",
+                "keyVaultSecretName": "erp-sql-sp-secret"
+            }
+        },
+        {
+            "name": "conn_json_api",
+            "type": "RestService",
+            "description": "API JSON commandes → lh_sales",
+            "connectionProperties": {
+                "url": "${JSON_API_BASE_URL}",
+                "authenticationType": "OAuth2",
+                "clientSecretKeyVault": "json-api-client-secret"
+            }
+        },
+        {
+            "name": "conn_mail_exchange",
+            "type": "Office365",
+            "description": "Exchange mails → lh_sales",
+            "connectionProperties": {
+                "authenticationType": "ServicePrincipal",
+                "keyVaultSecretName": "mail-sp-secret"
+            }
+        },
+        {
+            "name": "conn_cosmos_db",
+            "type": "CosmosDb",
+            "description": "Cosmos DB pour lectures faible latence",
+            "connectionProperties": {
+                "accountEndpoint": "${COSMOS_ENDPOINT}",
+                "database": "bgsolutions",
+                "keyVaultSecretName": "cosmos-db-key"
+            }
+        }
+    ],
+    "shortcuts": {
+        "description": "Lakehouse Shortcuts pour partager les données référentielles",
+        "definitions": [
+            {
+                "source": "lh_shared.gold.dim_clients",
+                "targets": ["lh_finance", "lh_operations", "lh_sales"],
+                "shortcutName": "shared_dim_clients"
+            },
+            {
+                "source": "lh_shared.gold.dim_products",
+                "targets": ["lh_finance", "lh_operations", "lh_sales"],
+                "shortcutName": "shared_dim_products"
+            },
+            {
+                "source": "lh_shared.silver.clean_clients",
+                "targets": ["lh_sales"],
+                "shortcutName": "shared_clean_clients"
+            },
+            {
+                "source": "lh_shared.silver.clean_produits",
+                "targets": ["lh_finance", "lh_operations", "lh_sales"],
+                "shortcutName": "shared_clean_produits"
+            }
+        ]
+    }
+}

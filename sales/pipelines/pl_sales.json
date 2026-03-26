@@ -1,0 +1,29 @@
+{
+    "name": "pl_sales",
+    "properties": {
+        "description": "Pipeline domaine Sales : ERP + JSON → lh_sales Bronze → Silver → Gold",
+        "activities": [
+            { "name": "Copy_Sales_Orders", "type": "Copy", "dependsOn": [],
+              "typeProperties": { "source": { "type": "SqlServerSource", "sqlReaderQuery": "SELECT * FROM dbo.sales_orders WHERE date_modification >= '@{pipeline().parameters.LastLoadDate}'" },
+                "sink": { "type": "LakehouseTableSink", "tableActionOption": "Append" },
+                "datasetSink": { "referenceName": "ds_lh_sales_bronze", "parameters": { "tableName": "raw_erp_sales" } } } },
+            { "name": "Copy_Sales_Lines", "type": "Copy", "dependsOn": [],
+              "typeProperties": { "source": { "type": "SqlServerSource", "sqlReaderQuery": "SELECT * FROM dbo.sales_lines WHERE commande_id IN (SELECT commande_id FROM dbo.sales_orders WHERE date_modification >= '@{pipeline().parameters.LastLoadDate}')" },
+                "sink": { "type": "LakehouseTableSink", "tableActionOption": "Append" },
+                "datasetSink": { "referenceName": "ds_lh_sales_bronze", "parameters": { "tableName": "raw_sales_lines" } } } },
+            { "name": "NB_Bronze_To_Silver_Sales", "type": "SparkNotebook",
+              "dependsOn": [
+                  { "activity": "Copy_Sales_Orders", "dependencyConditions": ["Succeeded"] },
+                  { "activity": "Copy_Sales_Lines", "dependencyConditions": ["Succeeded"] }
+              ],
+              "typeProperties": { "notebook": { "referenceName": "nb_bronze_to_silver_sales" } } },
+            { "name": "NB_Silver_To_Gold_Sales", "type": "SparkNotebook",
+              "dependsOn": [{ "activity": "NB_Bronze_To_Silver_Sales", "dependencyConditions": ["Succeeded"] }],
+              "typeProperties": { "notebook": { "referenceName": "nb_silver_to_gold_sales" } } },
+            { "name": "Refresh_SM_Sales", "type": "WebActivity",
+              "dependsOn": [{ "activity": "NB_Silver_To_Gold_Sales", "dependencyConditions": ["Succeeded"] }],
+              "typeProperties": { "url": "@{pipeline().parameters.SemanticModelRefreshUrl}", "method": "POST", "body": "{}" } }
+        ],
+        "parameters": { "LastLoadDate": { "type": "String", "defaultValue": "1900-01-01" }, "SemanticModelRefreshUrl": { "type": "String" } }
+    }
+}
