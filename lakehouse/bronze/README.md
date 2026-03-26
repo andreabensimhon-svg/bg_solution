@@ -1,14 +1,27 @@
 # Bronze - Données brutes
 
-Données ingérées telles quelles depuis les sources.
+Données ingérées telles quelles depuis les sources. Toutes les colonnes sont en `STRING` (sauf `_ingestion_ts`).
 
-## Tables attendues
-- `raw_clients` : BDD clients partagée
-- `raw_erp_finance` : Données ERP Finance
-- `raw_erp_operations` : Données ERP Opérations
-- `raw_erp_sales` : Données ERP Ventes
-- `raw_json_orders` : Commandes JSON
-- `raw_mails` : Corps de mails
-- `raw_supply_plans` : Plans de supply
-- `raw_iot_images` : Images capteurs IoT
-- `raw_iot_stream` : Flux temps réel capteurs
+## Fichiers
+- [`schema_bronze.sql`](schema_bronze.sql) : DDL complet de toutes les tables Bronze
+
+## Tables
+| Table | Source | Mode |
+|-------|--------|------|
+| `raw_clients` | BDD clients partagée | Overwrite |
+| `raw_produits` | ERP - Référentiel | Overwrite |
+| `raw_erp_finance` | ERP - Transactions | Append |
+| `raw_erp_bilans` | ERP - Bilans comptables | Overwrite |
+| `raw_erp_operations` | ERP - Ordres de fabrication | Append |
+| `raw_supply_chain` | ERP - Supply chain | Append |
+| `raw_process_sanitaire` | ERP - Contrôles sanitaires | Append |
+| `raw_erp_sales` | ERP - Commandes ventes | Append |
+| `raw_sales_lines` | ERP - Lignes de commande | Append |
+| `raw_json_orders` | API JSON externe | Append |
+| `raw_mails` | Office 365 | Append |
+| `raw_supply_plans` | Documents extraits | Append |
+| `raw_iot_images` | Capteurs IoT (images) | Append |
+| `raw_iot_stream` | Eventstream capteurs IoT | Append |
+
+## Colonnes techniques
+Chaque table contient : `_ingestion_ts`, `_source_file`, `_batch_id`

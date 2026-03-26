@@ -20,7 +20,7 @@ Plan de réalisation de la plateforme Data Microsoft Fabric pour une entreprise 
 
 | Dataset | Exemples de données |
 |---------|---------------------|
-| **Clients** | Renault, PSA, garages indépendants... |
+| **Clients** | Grands comptes, garages indépendants... |
 | **Produits** | Matériaux carrosserie (primer, peinture, mastic, vernis...) |
 | **Ventes** | Commandes B2B, bons de livraison, distributions |
 | **Finance** | Factures, calculs de marges, bilans comptables |
@@ -48,7 +48,7 @@ Plan de réalisation de la plateforme Data Microsoft Fabric pour une entreprise 
 | # | Tâche | Description | Statut |
 |---|-------|-------------|--------|
 | 3.1 | Créer le modèle sémantique Power BI | Semantic model avec relations entre tables Gold | ⬜ A faire |
-| 3.2 | Définir les mesures DAX | KPIs métier : marges, forecast, production, ventes Renault | ⬜ A faire |
+| 3.2 | Définir les mesures DAX | KPIs métier : marges, forecast, production, ventes grands comptes | ⬜ A faire |
 | 3.3 | Préparer le RT Dashboard | Dashboard temps réel pour le suivi des capteurs IoT | ⬜ A faire |
 
 ### Rapports prévus
@@ -60,7 +60,7 @@ Plan de réalisation de la plateforme Data Microsoft Fabric pour une entreprise 
 | Production & Supply | Opérations | KPIs production, suivi supply chain |
 | Process sanitaire | Opérations | Conformité et suivi sanitaire |
 | Ventes B2B | Sales | Performance ventes, distribution |
-| Client Renault | Sales | Suivi dédié gros client |
+| Grands comptes | Sales | Suivi dédié gros client |
 | Capteurs IoT | IoT | RT Dashboard temps réel |
 
 ---

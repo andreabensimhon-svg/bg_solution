@@ -1,0 +1,238 @@
+// ============================================================
+// BGSolutions - Mesures DAX
+// KPIs métier pour tous les rapports Power BI
+// ============================================================
+
+// ========================
+// FINANCE - Marges & Forecast
+// ========================
+
+CA Total HT =
+SUMX(
+    fact_marges,
+    fact_marges[chiffre_affaires_ht]
+)
+
+Coût de Revient Total =
+SUMX(
+    fact_marges,
+    fact_marges[cout_revient]
+)
+
+Marge Brute Totale =
+[CA Total HT] - [Coût de Revient Total]
+
+Marge Brute % =
+DIVIDE(
+    [Marge Brute Totale],
+    [CA Total HT],
+    0
+)
+
+Marge Nette Totale =
+[Marge Brute Totale] * 0.85
+
+Marge Nette % =
+DIVIDE(
+    [Marge Nette Totale],
+    [CA Total HT],
+    0
+)
+
+CA Année Précédente =
+CALCULATE(
+    [CA Total HT],
+    SAMEPERIODLASTYEAR('Calendrier'[Date])
+)
+
+Croissance CA % =
+DIVIDE(
+    [CA Total HT] - [CA Année Précédente],
+    [CA Année Précédente],
+    0
+)
+
+Forecast CA =
+SUMX(
+    fact_forecast,
+    fact_forecast[ca_prevu]
+)
+
+Écart Forecast % =
+DIVIDE(
+    [CA Total HT] - [Forecast CA],
+    [Forecast CA],
+    0
+)
+
+// ========================
+// SALES - Ventes & Clients
+// ========================
+
+Nb Commandes =
+SUMX(
+    fact_ventes,
+    fact_ventes[nb_commandes]
+)
+
+Volume Total Vendu =
+SUMX(
+    fact_ventes,
+    fact_ventes[quantite_totale]
+)
+
+CA Net HT =
+SUMX(
+    fact_ventes,
+    fact_ventes[ca_net_ht]
+)
+
+Panier Moyen =
+DIVIDE(
+    [CA Net HT],
+    [Nb Commandes],
+    0
+)
+
+Nb Clients Actifs =
+DISTINCTCOUNT(fact_ventes[client_id])
+
+CA par Client =
+DIVIDE(
+    [CA Net HT],
+    [Nb Clients Actifs],
+    0
+)
+
+Top 10 Clients CA =
+CALCULATE(
+    [CA Net HT],
+    TOPN(
+        10,
+        ALL(fact_clients),
+        [CA Net HT],
+        DESC
+    )
+)
+
+Part Grands Comptes % =
+DIVIDE(
+    CALCULATE(
+        [CA Net HT],
+        fact_clients[categorie_abc] = "A"
+    ),
+    [CA Net HT],
+    0
+)
+
+// ========================
+// OPERATIONS - Production
+// ========================
+
+Nb Ordres Fabrication =
+SUMX(
+    fact_production,
+    fact_production[nb_ordres]
+)
+
+Quantité Produite =
+SUMX(
+    fact_production,
+    fact_production[quantite_produite_total]
+)
+
+Taux Rendement Moyen =
+AVERAGEX(
+    fact_production,
+    fact_production[taux_rendement_moyen]
+)
+
+Nb Incidents =
+SUMX(
+    fact_production,
+    fact_production[nb_incidents]
+)
+
+Taux Incidents % =
+DIVIDE(
+    [Nb Incidents],
+    [Nb Ordres Fabrication],
+    0
+)
+
+// ========================
+// OPERATIONS - Process Sanitaire
+// ========================
+
+Taux Conformité Sanitaire % =
+AVERAGEX(
+    fact_process_sanitaire,
+    fact_process_sanitaire[taux_conformite_pct]
+)
+
+Nb Non Conformités =
+SUMX(
+    fact_process_sanitaire,
+    fact_process_sanitaire[nb_non_conformes]
+)
+
+Nb Alertes Sanitaires =
+SUMX(
+    fact_process_sanitaire,
+    fact_process_sanitaire[nb_alertes]
+)
+
+// ========================
+// OPERATIONS - Supply Chain
+// ========================
+
+Délai Moyen Livraison =
+AVERAGEX(
+    fact_supply_chain,
+    fact_supply_chain[delai_moyen_jours]
+)
+
+Taux Retard Fournisseurs % =
+AVERAGEX(
+    fact_supply_chain,
+    fact_supply_chain[taux_retard_pct]
+)
+
+// ========================
+// IoT - Capteurs
+// ========================
+
+Nb Mesures IoT =
+SUMX(
+    fact_iot_realtime,
+    fact_iot_realtime[nb_mesures]
+)
+
+Température Moyenne =
+CALCULATE(
+    AVERAGEX(
+        fact_iot_realtime,
+        fact_iot_realtime[valeur_moyenne]
+    ),
+    fact_iot_realtime[type_mesure] = "temperature"
+)
+
+Pression Moyenne =
+CALCULATE(
+    AVERAGEX(
+        fact_iot_realtime,
+        fact_iot_realtime[valeur_moyenne]
+    ),
+    fact_iot_realtime[type_mesure] = "pression"
+)
+
+Nb Anomalies IoT =
+CALCULATE(
+    COUNTROWS(fact_iot_anomalies)
+)
+
+Nb Anomalies Critiques =
+CALCULATE(
+    COUNTROWS(fact_iot_anomalies),
+    fact_iot_anomalies[severite] = "critical"
+)

@@ -1,0 +1,26 @@
+{
+    "name": "cj_erp_clients_full",
+    "description": "Copy Job - Chargement complet de la table clients depuis l'ERP",
+    "sourceConnection": "conn_bdd_clients",
+    "destinationConnection": "conn_lakehouse_bronze",
+    "copyBehavior": "Overwrite",
+    "schedule": {
+        "frequency": "Daily",
+        "time": "02:00",
+        "timeZone": "Europe/Paris"
+    },
+    "mappings": [
+        {
+            "source": { "table": "dbo.clients" },
+            "destination": { "table": "raw_clients" },
+            "columnMappings": "auto"
+        }
+    ],
+    "settings": {
+        "parallelCopies": 4,
+        "dataIntegrationUnits": 8,
+        "enableStaging": false,
+        "enableLogging": true,
+        "logStoragePath": "Files/logs/copy_jobs/"
+    }
+}

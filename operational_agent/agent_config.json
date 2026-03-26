@@ -1,0 +1,71 @@
+{
+    "name": "oa_bgsolutions",
+    "displayName": "BGSolutions Operational Agent",
+    "description": "Agent opérationnel pour l'automatisation et le monitoring de la plateforme BGSolutions",
+    "instructions": "Tu es l'agent opérationnel de la plateforme data BGSolutions. Tu surveilles les pipelines, les flux IoT et les KPIs métier. Tu peux répondre aux questions sur l'état de la plateforme et exécuter des actions de maintenance.",
+    "capabilities": {
+        "data_query": {
+            "enabled": true,
+            "description": "Interroger les données du Lakehouse Gold et du Warehouse",
+            "allowed_schemas": ["gold", "finance", "operations", "sales", "iot"]
+        },
+        "pipeline_monitoring": {
+            "enabled": true,
+            "description": "Vérifier le statut des pipelines d'ingestion",
+            "pipelines": [
+                "pl_orchestrator_main",
+                "pl_ingest_clients",
+                "pl_ingest_erp_finance",
+                "pl_ingest_erp_sales",
+                "pl_ingest_erp_operations"
+            ]
+        },
+        "alerting": {
+            "enabled": true,
+            "description": "Gérer les alertes et notifications",
+            "alert_types": ["iot_anomalie", "seuil_finance", "retard_supply", "non_conformite", "systeme"]
+        }
+    },
+    "knowledge_sources": [
+        {
+            "type": "lakehouse",
+            "name": "lh_bgsolutions",
+            "schemas": ["gold"]
+        },
+        {
+            "type": "warehouse",
+            "name": "wh_bgsolutions",
+            "schemas": ["finance", "operations", "sales", "iot"]
+        }
+    ],
+    "sample_prompts": [
+        "Quel est le CA total du mois dernier ?",
+        "Y a-t-il des anomalies IoT critiques aujourd'hui ?",
+        "Quel est le taux de conformité sanitaire ce mois-ci ?",
+        "Montre-moi les 10 meilleurs clients en CA",
+        "Quel est le statut du dernier run du pipeline orchestrateur ?",
+        "Combien de commandes ont été passées cette semaine ?",
+        "Quel est le taux de retard des fournisseurs ?",
+        "Lance un OPTIMIZE sur les tables Gold"
+    ],
+    "scheduled_tasks": [
+        {
+            "name": "check_pipeline_health",
+            "description": "Vérifier l'état des dernières exécutions de pipelines",
+            "schedule": "0 8 * * *",
+            "action": "Si un pipeline a échoué, créer une alerte de type 'systeme' avec sévérité 'critical'"
+        },
+        {
+            "name": "check_iot_anomalies",
+            "description": "Résumer les anomalies IoT des dernières 24h",
+            "schedule": "0 7 * * *",
+            "action": "Compter les anomalies par sévérité et créer un rapport résumé"
+        },
+        {
+            "name": "daily_kpi_summary",
+            "description": "Résumé quotidien des KPIs clés",
+            "schedule": "0 9 * * 1-5",
+            "action": "Générer un résumé : CA jour, nb commandes, taux rendement, anomalies IoT"
+        }
+    ]
+}

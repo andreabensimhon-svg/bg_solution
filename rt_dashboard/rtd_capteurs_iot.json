@@ -1,0 +1,111 @@
+{
+    "name": "rtd_capteurs_iot",
+    "displayName": "RT Dashboard - Capteurs IoT",
+    "description": "Dashboard temps réel pour le suivi des capteurs IoT de production",
+    "autoRefreshInterval": "30s",
+    "pages": [
+        {
+            "name": "Vue Temps Réel",
+            "tiles": [
+                {
+                    "id": "tile_temp_gauge",
+                    "type": "KQLVisual",
+                    "title": "Température Moyenne (5 min)",
+                    "visualType": "gauge",
+                    "query": "iot_events_raw | where type_mesure == 'temperature' | where timestamp_capteur > ago(5m) | summarize avg_val = avg(valeur) by bin(timestamp_capteur, 5m) | top 1 by timestamp_capteur desc",
+                    "min": 0,
+                    "max": 200,
+                    "thresholds": [
+                        { "value": 100, "color": "green" },
+                        { "value": 150, "color": "orange" },
+                        { "value": 200, "color": "red" }
+                    ],
+                    "position": { "row": 0, "col": 0, "width": 4, "height": 3 }
+                },
+                {
+                    "id": "tile_pression_gauge",
+                    "type": "KQLVisual",
+                    "title": "Pression Moyenne (5 min)",
+                    "visualType": "gauge",
+                    "query": "iot_events_raw | where type_mesure == 'pression' | where timestamp_capteur > ago(5m) | summarize avg_val = avg(valeur) by bin(timestamp_capteur, 5m) | top 1 by timestamp_capteur desc",
+                    "min": 0,
+                    "max": 500,
+                    "thresholds": [
+                        { "value": 200, "color": "green" },
+                        { "value": 350, "color": "orange" },
+                        { "value": 500, "color": "red" }
+                    ],
+                    "position": { "row": 0, "col": 4, "width": 4, "height": 3 }
+                },
+                {
+                    "id": "tile_humidite_gauge",
+                    "type": "KQLVisual",
+                    "title": "Humidité Moyenne (5 min)",
+                    "visualType": "gauge",
+                    "query": "iot_events_raw | where type_mesure == 'humidite' | where timestamp_capteur > ago(5m) | summarize avg_val = avg(valeur) by bin(timestamp_capteur, 5m) | top 1 by timestamp_capteur desc",
+                    "min": 0,
+                    "max": 100,
+                    "thresholds": [
+                        { "value": 40, "color": "orange" },
+                        { "value": 70, "color": "green" },
+                        { "value": 90, "color": "red" }
+                    ],
+                    "position": { "row": 0, "col": 8, "width": 4, "height": 3 }
+                },
+                {
+                    "id": "tile_timeline",
+                    "type": "KQLVisual",
+                    "title": "Évolution temps réel (30 min)",
+                    "visualType": "lineChart",
+                    "query": "iot_events_raw | where timestamp_capteur > ago(30m) | summarize avg_val = avg(valeur) by type_mesure, bin(timestamp_capteur, 1m) | render timechart",
+                    "position": { "row": 3, "col": 0, "width": 12, "height": 4 }
+                },
+                {
+                    "id": "tile_anomalies_count",
+                    "type": "KQLVisual",
+                    "title": "Anomalies détectées (1h)",
+                    "visualType": "card",
+                    "query": "iot_events_raw | where timestamp_capteur > ago(1h) | where valeur > percentile(valeur, 99) or valeur < percentile(valeur, 1) | count",
+                    "conditionalFormatting": {
+                        "0": "green",
+                        "5": "orange",
+                        "10": "red"
+                    },
+                    "position": { "row": 7, "col": 0, "width": 3, "height": 2 }
+                },
+                {
+                    "id": "tile_events_per_sec",
+                    "type": "KQLVisual",
+                    "title": "Événements/sec",
+                    "visualType": "card",
+                    "query": "iot_events_raw | where timestamp_capteur > ago(1m) | count | extend events_per_sec = Count / 60.0",
+                    "position": { "row": 7, "col": 3, "width": 3, "height": 2 }
+                },
+                {
+                    "id": "tile_capteurs_actifs",
+                    "type": "KQLVisual",
+                    "title": "Capteurs actifs",
+                    "visualType": "card",
+                    "query": "iot_events_raw | where timestamp_capteur > ago(5m) | summarize by capteur_id | count",
+                    "position": { "row": 7, "col": 6, "width": 3, "height": 2 }
+                },
+                {
+                    "id": "tile_heatmap",
+                    "type": "KQLVisual",
+                    "title": "Heatmap par zone",
+                    "visualType": "heatMap",
+                    "query": "iot_events_raw | where timestamp_capteur > ago(15m) | where type_mesure == 'temperature' | summarize avg_temp = avg(valeur) by ligne_production, zone",
+                    "position": { "row": 7, "col": 9, "width": 3, "height": 2 }
+                },
+                {
+                    "id": "tile_detail_table",
+                    "type": "KQLVisual",
+                    "title": "Derniers événements",
+                    "visualType": "table",
+                    "query": "iot_events_raw | top 50 by timestamp_capteur desc | project timestamp_capteur, capteur_id, type_mesure, valeur, unite, ligne_production, zone, qualite_signal",
+                    "position": { "row": 9, "col": 0, "width": 12, "height": 4 }
+                }
+            ]
+        }
+    ]
+}

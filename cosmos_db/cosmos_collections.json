@@ -1,0 +1,125 @@
+{
+    "database": "bgsolutions",
+    "description": "Base Cosmos DB NoSQL pour les données semi-structurées et lectures faible latence",
+    "throughput": {
+        "type": "autoscale",
+        "maxThroughput": 4000
+    },
+    "containers": [
+        {
+            "name": "clients",
+            "description": "Données clients enrichies avec profil complet et historique interactions",
+            "partitionKey": "/type_client",
+            "uniqueKeys": ["/client_id"],
+            "defaultTtl": -1,
+            "indexingPolicy": {
+                "automatic": true,
+                "indexingMode": "consistent",
+                "includedPaths": [
+                    { "path": "/client_id/?" },
+                    { "path": "/type_client/?" },
+                    { "path": "/ville/?" },
+                    { "path": "/categorie_abc/?" }
+                ],
+                "excludedPaths": [
+                    { "path": "/historique_interactions/*" }
+                ]
+            },
+            "sampleDocument": {
+                "id": "client-001",
+                "client_id": 1,
+                "raison_sociale": "Client_0001",
+                "type_client": "grand_compte",
+                "siret": "123456789012",
+                "adresse": {
+                    "rue": "1 rue de la Réussite",
+                    "code_postal": "75001",
+                    "ville": "Paris",
+                    "pays": "France"
+                },
+                "contact": {
+                    "nom": "Resp. Achats 1",
+                    "email": "contact@client0001.fr",
+                    "telephone": "+33100000001"
+                },
+                "categorie_abc": "A",
+                "score_fidelite": 85.5,
+                "ca_cumule_ht": 250000.00,
+                "preferences": {
+                    "canal_prefere": "direct",
+                    "frequence_commande": "hebdomadaire",
+                    "produits_favoris": ["primer", "peinture"]
+                },
+                "historique_interactions": [
+                    {
+                        "date": "2025-12-01",
+                        "type": "commande",
+                        "reference": "CMD-2025-001"
+                    }
+                ],
+                "_ts": 1735689600
+            }
+        },
+        {
+            "name": "iot_events",
+            "description": "Événements IoT récents pour requêtes faible latence",
+            "partitionKey": "/capteur_id",
+            "defaultTtl": 86400,
+            "indexingPolicy": {
+                "automatic": true,
+                "indexingMode": "consistent",
+                "includedPaths": [
+                    { "path": "/capteur_id/?" },
+                    { "path": "/type_mesure/?" },
+                    { "path": "/timestamp_capteur/?" },
+                    { "path": "/severite/?" }
+                ]
+            },
+            "sampleDocument": {
+                "id": "evt-20251201-001",
+                "event_id": 1,
+                "capteur_id": "CAPT-PROD-001",
+                "type_mesure": "temperature",
+                "valeur": 82.5,
+                "unite": "celsius",
+                "timestamp_capteur": "2025-12-01T10:30:00Z",
+                "ligne_production": "L1",
+                "zone": "zone_A",
+                "qualite_signal": 95.2,
+                "is_anomalie": false,
+                "_ts": 1735689600
+            }
+        },
+        {
+            "name": "mail_metadata",
+            "description": "Métadonnées emails parsés pour recherche rapide",
+            "partitionKey": "/langue_detectee",
+            "defaultTtl": -1,
+            "indexingPolicy": {
+                "automatic": true,
+                "indexingMode": "consistent",
+                "includedPaths": [
+                    { "path": "/expediteur/?" },
+                    { "path": "/date_envoi/?" },
+                    { "path": "/langue_detectee/?" }
+                ],
+                "excludedPaths": [
+                    { "path": "/corps_nettoye/?" }
+                ]
+            },
+            "sampleDocument": {
+                "id": "mail-001",
+                "mail_id": 1,
+                "expediteur": "fournisseur@example.com",
+                "destinataire": "achats@bgsolutions.fr",
+                "sujet": "Confirmation commande matières premières",
+                "date_envoi": "2025-11-15T09:00:00Z",
+                "nb_pieces_jointes": 2,
+                "langue_detectee": "fr",
+                "sentiment_score": 0.75,
+                "tags_extraits": ["commande", "confirmation", "matières premières"],
+                "_ts": 1735689600
+            }
+        }
+    ]
+}

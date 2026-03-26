@@ -1,0 +1,96 @@
+{
+    "name": "pl_ingest_erp_sales",
+    "properties": {
+        "description": "Pipeline d'ingestion batch des données ventes depuis l'ERP vers le Lakehouse Bronze",
+        "activities": [
+            {
+                "name": "Copy_ERP_Sales_Orders",
+                "type": "Copy",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.02:00:00",
+                    "retry": 2,
+                    "retryIntervalInSeconds": 60
+                },
+                "typeProperties": {
+                    "source": {
+                        "type": "SqlServerSource",
+                        "sqlReaderQuery": "SELECT * FROM dbo.sales_orders WHERE date_modification >= '@{pipeline().parameters.LastLoadDate}'"
+                    },
+                    "sink": {
+                        "type": "LakehouseTableSink",
+                        "tableActionOption": "Append"
+                    },
+                    "datasetSource": {
+                        "referenceName": "ds_erp_sql_sales",
+                        "type": "DatasetReference"
+                    },
+                    "datasetSink": {
+                        "referenceName": "ds_lakehouse_bronze",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "tableName": "raw_erp_sales"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "Copy_ERP_Sales_Lines",
+                "type": "Copy",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.02:00:00",
+                    "retry": 2,
+                    "retryIntervalInSeconds": 60
+                },
+                "typeProperties": {
+                    "source": {
+                        "type": "SqlServerSource",
+                        "sqlReaderQuery": "SELECT * FROM dbo.sales_lines WHERE commande_id IN (SELECT commande_id FROM dbo.sales_orders WHERE date_modification >= '@{pipeline().parameters.LastLoadDate}')"
+                    },
+                    "sink": {
+                        "type": "LakehouseTableSink",
+                        "tableActionOption": "Append"
+                    },
+                    "datasetSource": {
+                        "referenceName": "ds_erp_sql_sales_lines",
+                        "type": "DatasetReference"
+                    },
+                    "datasetSink": {
+                        "referenceName": "ds_lakehouse_bronze",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "tableName": "raw_sales_lines"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "Notebook_Bronze_To_Silver_Sales",
+                "type": "SparkNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "Copy_ERP_Sales_Orders",
+                        "dependencyConditions": ["Succeeded"]
+                    },
+                    {
+                        "activity": "Copy_ERP_Sales_Lines",
+                        "dependencyConditions": ["Succeeded"]
+                    }
+                ],
+                "typeProperties": {
+                    "notebook": {
+                        "referenceName": "nb_bronze_to_silver_sales",
+                        "type": "NotebookReference"
+                    }
+                }
+            }
+        ],
+        "parameters": {
+            "LastLoadDate": {
+                "type": "String",
+                "defaultValue": "1900-01-01"
+            }
+        }
+    }
+}
